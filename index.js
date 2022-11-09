@@ -22,6 +22,8 @@ async function run() {
   try {
     const serviceCollection = client.db("pictorialdb").collection("services");
 
+    const userReviews = client.db("pictorialdb").collection("userReviews");
+
     app.get("/services", async (req, res) => {
       const query = {};
       const cursor = serviceCollection.find(query);
@@ -35,6 +37,15 @@ async function run() {
       const service = await serviceCollection.findOne(query);
       res.send(service);
     });
+
+
+    // reviews api
+    app.post('/reviews', async(req,res)=>{
+      const reviews = req.body;
+      const result = await userReviews.insertOne(reviews);
+      res.send(result);
+
+    })
 
 
   } 

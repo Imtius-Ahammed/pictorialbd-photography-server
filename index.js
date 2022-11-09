@@ -40,11 +40,32 @@ async function run() {
 
 
     // reviews api
+
+    app.get('/reviews', async(req,res)=>{
+
+      let query ={};
+      console.log(req.query);
+      if(req.query.email){
+        query={
+          email: req.query.email
+        }
+      }
+      const cursor = userReviews.find(query);
+      const orders = await cursor.toArray();
+      res.send(orders);
+    })
     app.post('/reviews', async(req,res)=>{
       const reviews = req.body;
       const result = await userReviews.insertOne(reviews);
       res.send(result);
 
+    })
+
+    app.delete('/reviews/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id : ObjectId(id)};
+      const result = await userReviews.deleteOne(query);
+      res.send(result);
     })
 
 

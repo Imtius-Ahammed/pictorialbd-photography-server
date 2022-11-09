@@ -76,6 +76,28 @@ async function run() {
       res.send(result);
 
     })
+    
+    app.put('/reviews/:id',async(req,res)=>{
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id)};
+      const user = req.body;
+      const option = { upsert : true};
+      const updatedUser = req.body;
+      console.log(updatedUser);
+      // const updatedUser = {
+      //   $set:{
+      //     message: user.message,
+          
+      //     email: user.email
+      //   }
+      // }
+      // console.log(updatedUser)
+      // const result = await userReviews.updateOne(filter,updatedUser,option);
+      // res.send(result);
+      // console.log(result);
+      
+    })
+    
 
     app.delete('/reviews/:id',async(req,res)=>{
       const id = req.params.id;

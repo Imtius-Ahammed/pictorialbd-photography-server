@@ -61,6 +61,15 @@ async function run() {
       const orders = await cursor.toArray();
       res.send(orders);
     })
+
+    app.get('/reviews/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query ={_id:  ObjectId(id)};
+      const user = await userReviews.findOne(query);
+      res.send(user)
+    })
+
+
     app.post('/reviews', async(req,res)=>{
       const reviews = req.body;
       const result = await userReviews.insertOne(reviews);

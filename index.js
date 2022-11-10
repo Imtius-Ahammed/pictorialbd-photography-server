@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 
@@ -19,34 +19,35 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
- function verifyJWT(req,res, next){
- const authHeader = req.headers.authorization;
- if(!authHeader){
-  res.status(401).send({message:'Unauthorized Access'})
- }
- const token = authHeader.split(' ')[1];
- jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err,decoded){
-  if(err){
-    res.status(401).send({message: 'unathorized access'})
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    res.status(401).send({ message: "Unauthorized Access" });
   }
-  req.decoded = decoded;
-  next();
- })
-
- }
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      res.status(401).send({ message: "unathorized access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
 
 async function run() {
   try {
     const serviceCollection = client.db("pictorialdb").collection("services");
 
     const userReviews = client.db("pictorialdb").collection("userReviews");
-    
-// jwt
-    app.post('/jwt',(req,res)=>{
-      const user =req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET,{expiresIn: '1d'})
-      res.send({token});
-    })
+
+    // jwt
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1d",
+      });
+      res.send({ token });
+    });
 
     app.get("/services", async (req, res) => {
       const query = {};
@@ -61,12 +62,11 @@ async function run() {
       res.send(services);
     });
 
-    app.post('/allservices',verifyJWT, async(req,res)=>{
+    app.post("/allservices", verifyJWT, async (req, res) => {
       const postServices = req.body;
       const result = await serviceCollection.insertOne(postServices);
       res.send(result);
-
-    })
+    });
 
     app.get("/allservices/:id", async (req, res) => {
       const id = req.params.id;
@@ -75,83 +75,66 @@ async function run() {
       res.send(service);
     });
 
-
     // reviews api
 
-    app.get('/reviews',verifyJWT, async(req,res)=>{
+    app.get("/reviews", verifyJWT, async (req, res) => {
       const decoded = req.decoded;
-      console.log('inside orders ',decoded);
-      if(decoded.email !== req.query.email){
-        res.status(403).send({message: 'Forbidden access'})
+      console.log("inside orders ", decoded);
+      if (decoded.email !== req.query.email) {
+        res.status(403).send({ message: "Forbidden access" });
       }
 
-      let query ={};
+      let query = {};
       console.log(req.query);
-      if(req.query.email){
-        query={
-          email: req.query.email
-        }
+      if (req.query.email) {
+        query = {
+          email: req.query.email,
+        };
       }
       const cursor = userReviews.find(query);
       const orders = await cursor.toArray();
       res.send(orders);
-    })
+    });
 
-    // app.get('/reviews/:id',async(req,res)=>{
-    //   const id = req.params.id;
-    //   const query ={_id:  ObjectId(id)};
-    //   const user = await userReviews.findOne(query);
-    //   res.send(user)
-    // })
-
-
-    app.post('/reviews', async(req,res)=>{
+    app.post("/reviews", async (req, res) => {
       const reviews = req.body;
       const result = await userReviews.insertOne(reviews);
       res.send(result);
+    });
 
-    })
-    
-    app.put('/reviews/:id',verifyJWT, async(req,res)=>{
+    app.put("/reviews/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
-      const filter = { _id: ObjectId(id)};
+      const filter = { _id: ObjectId(id) };
       const user = req.body;
-      const option = { upsert : true};
-     
+      const option = { upsert: true };
+
       const updatedUser = {
-        $set:{
+        $set: {
           email: user.email,
-          message: user.message
-          
-          
-        }
-      }
-      console.log(updatedUser)
-      const result = await userReviews.updateMany(filter,updatedUser,option);
+          message: user.message,
+        },
+      };
+      console.log(updatedUser);
+      const result = await userReviews.updateMany(filter, updatedUser, option);
       res.send(result);
       console.log(result);
-      
-    })
-    
+    });
 
-    app.delete('/reviews/:id', async(req,res)=>{
+    app.delete("/reviews/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id : ObjectId(id)};
+      const query = { _id: ObjectId(id) };
       const result = await userReviews.deleteOne(query);
       res.send(result);
-    })
+    });
 
-    app.get('/reviews/:id', async (req, res) => {
+    app.get("/reviews/:id", async (req, res) => {
       const id = req.params.id;
       const query = { id };
-      const result =  userReviews.find(query);
-      const service = await result.toArray()
+      const result = userReviews.find(query);
+      const service = await result.toArray();
       res.send(service);
-    })
-
-
-  } 
-  finally {
+    });
+  } finally {
   }
 }
 run().catch((error) => console.error(error));

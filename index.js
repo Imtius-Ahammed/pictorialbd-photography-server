@@ -77,12 +77,12 @@ async function run() {
 
     // reviews api
 
-    app.get("/reviews", verifyJWT, async (req, res) => {
+    app.get("/reviews", async (req, res) => {
       const decoded = req.decoded;
       console.log("inside orders ", decoded);
-      if (decoded.email !== req.query.email) {
-        res.status(403).send({ message: "Forbidden access" });
-      }
+      // if (decoded.email !== req.query.email) {
+      //   res.status(403).send({ message: "Forbidden access" });
+      // }
 
       let query = {};
       console.log(req.query);
@@ -102,7 +102,7 @@ async function run() {
       res.send(result);
     });
 
-    app.put("/reviews/:id", verifyJWT, async (req, res) => {
+    app.put("/reviews/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const user = req.body;
